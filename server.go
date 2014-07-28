@@ -35,6 +35,8 @@ func main() {
 	http.HandleFunc("/",webHandler)
 	http.HandleFunc("/ws",wsHandler)
 	http.HandleFunc("/noencws",wsnoencHandler)
+	http.HandleFunc("/script.js",jsscript)
+	http.HandleFunc("/glMatrix-0.9.5.min.js",glMatrix)
 	err := http.ListenAndServe(":"+port,nil)
 	if err != nil {
 		panic(err)
@@ -47,19 +49,36 @@ func webHandler(res http.ResponseWriter, req *http.Request){
 	if err != nil {
 		fmt.Fprintln(res,[]byte("Error loading page."))
 	}
-	js_arr, err := ioutil.ReadFile("script.js")
-	if err != nil {
-		fmt.Fprintln(res,[]byte("Error loading page."))
-	}
-	arr := strings.Split(string(html_arr),`</script>`)
+	fmt.Fprintln(res,string(html_arr))
+	//js_arr, err := ioutil.ReadFile("script.js")
+	//if err != nil {
+//		fmt.Fprintln(res,[]byte("Error loading page."))
+//	}
+//	arr := strings.Split(string(html_arr),`</script>`)
 
 	//fmt.Println(arr)
 	//fmt.Println(len(arr))
 	//fmt.Println(len(arr[0]))
 	//fmt.Println(strings.Join(arr,`</script>`))
-	arr[0] = strings.Join([]string{arr[0],string(js_arr)},``)
-	fmt.Fprintln(res, strings.Join(arr,`</script>`))
+
+	//arr[0] = strings.Join([]string{arr[0],string(js_arr)},``)
+	//fmt.Fprintln(res, strings.Join(arr,`</script>`))
 }
+func jsscript(res http.ResponseWriter, req *http.Request) {
+	js_arr, err := ioutil.ReadFile("script.js")
+	if err != nil {
+		fmt.Fprintln(res,[]byte("Error loading page."))
+	}
+	fmt.Fprintln(res, string(js_arr))
+}
+func glMatrix(res http.ResponseWriter, req *http.Request) {
+	js_arr, err := ioutil.ReadFile("glMatrix-0.9.5.min.js")
+	if err != nil {
+		fmt.Fprintln(res,[]byte("Error loading page."))
+	}
+	fmt.Fprintln(res, string(js_arr))
+}
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
