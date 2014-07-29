@@ -1,1 +1,1 @@
-web: ./webgame
+web: webgame
