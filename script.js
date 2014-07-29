@@ -7,166 +7,76 @@ function webGLStart() {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.enable(gl.DEPTH_TEST);
 
+	mat4.perspective(45, gl.viewportWidth/gl.viewportHeight, 0.1,100.0,pMatrix);
+	loop();
+	//drawScene();
+}
+var step = 0
+function loop() {
+	window.requestAnimationFrame(loop);
 	drawScene();
+	animate();
+
+}
+function animate() {
+	mat4.translate(pMatrix, [0.0, 0.0, 0.02*Math.pow(-1,Math.floor(step/150))]);
+	mat4.identity(mvMatrix);
+	mat4.translate(mvMatrix,[0.0,0.0,-12.0])
+	mat4.rotateY(mvMatrix,Math.PI*step/60);
+	step += 1
 }
 
-var triangleVertexPositionBuffer;
-var triangleVertexColorBuffer;
 
-var squareVertexPositionBuffer;
-var squareVertexColorBuffer;
-
-var sphereVertexPositionBuffer;
-var sphereVertexColorBuffer;
+var triangle
+var square
+var spheres = [];
+var cube
 
 function initBuffers() {
-	triangleVertexPositionBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-	var vertices = [
-		 0.0,  1.0,  0.0,
-		-1.0, -1.0,  0.0,
-		 1.0, -1.0,  0.0
-	];
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-	triangleVertexPositionBuffer.itemSize = 3;
-	triangleVertexPositionBuffer.numItems = 3;
+	triangle = new Triangle();
 
-	triangleVertexColorBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
-	var colors = [
-		1.0, 0.0, 0.0, 1.0,
-		0.0, 1.0, 0.0, 1.0,
-		0.0, 0.0, 1.0, 1.0
-	];
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-	triangleVertexColorBuffer.itemSize = 4;
-	triangleVertexColorBuffer.numItems = 3;
+	square = new Square();
 
-	squareVertexPositionBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-	vertices = [
-		 1.0,  1.0,  0.0,
-		-1.0,  1.0,  0.0,
-		 1.0, -1.0,  0.0,
-		-1.0, -1.0,  0.0
-	];
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-	squareVertexPositionBuffer.itemSize = 3;
-	squareVertexPositionBuffer.numItems = 4;
-
-	squareVertexColorBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
-	colors = [];
-	for (var i=0; i < 4; i++) {
-		colors = colors.concat([0.5, 0.5, 1.0, 1.0]);
+	for( var i=0; i<20; i++){
+		console.log(i)
+		spheres.push(new Sphere(.3,20,20));
+		spheres[i].pos = [Math.random()*6-3,Math.random()*6-3,Math.random()*(-7)+3.5];
 	}
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-	squareVertexColorBuffer.itemSize = 4;
-	squareVertexColorBuffer.numItems = 4;
+	//sphere = new Sphere(1,100,100);
 
-	sphereVertexPositionBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexPositionBuffer);
-	out = createSphereVertices(1,10,10);//radius,numRings,numVertPerRing
-	vertices = out[0];
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-	sphereVertexPositionBuffer.itemSize = 3;
-	sphereVertexPositionBuffer.numItems = out[1];
-
-
-	sphereVertexColorBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexColorBuffer);
-	colors = [];
-	for (var i=0; i < out[1]; i++) {
-		step = 1/out[1];
-		colors = colors.concat([1.0-i*step, i*step, Math.abs(1-2*i*step), 1.0]);
-	}
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-	sphereVertexColorBuffer.itemSize = 4;
-	sphereVertexColorBuffer.numItems = out[1];
+	cube = new Cube()
 }
 
 function drawScene() {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 //Sets up perception, vertical field of 45degree, w/h ratio,visible 0.1<dist<100
-	mat4.perspective(45, gl.viewportWidth/gl.viewportHeight, 0.1,100.0,pMatrix);
+	//mat4.perspective(45, gl.viewportWidth/gl.viewportHeight, 0.1,100.0,pMatrix);
 
-	mat4.identity(mvMatrix);
 
-	mat4.translate(mvMatrix, [-1.5, 0.0, -7.0]);
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 
-			triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,
-			triangleVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	setMatrixUniforms();
-	gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+	mat4.translate(mvMatrix, [-1.5, 0.0, 0.0]);
+	triangle.Draw()
 
 
 	mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
-	gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 
-			squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexColorBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,
-			squareVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	setMatrixUniforms();
-	gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+	square.Draw()
 
 
 	//I added this.
-	mat4.translate(mvMatrix, [-1.5, 0.0, -2.0]);
-	gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexPositionBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute,
-			sphereVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexColorBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,
-			sphereVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	setMatrixUniforms();
-	gl.drawArrays(gl.TRIANGLE_STRIP, 0, sphereVertexPositionBuffer.numItems);
+	for( i=0; i<spheres.length; i++){
+		mat4.identity(mvMatrix);
+		mat4.translate(mvMatrix,[0.0,0.0,-12.0])
+		mat4.rotate(mvMatrix,-Math.PI*step/120,[0,1,0]);
+		mat4.translate(mvMatrix, spheres[i].pos);
+		spheres[i].Draw();
+	}
+	//mat4.translate(mvMatrix, [-1.5, 0.0, -2.0]);
+	//sphere.Draw()
+	//
+	mat4.rotate(mvMatrix,Math.PI*step/60,[1,1,0]);
+	cube.Draw()
 }
 
-//I added this.
-//Centered on 0,0,0
-function createSphereVertices(radius,numRings,vertPerRing) {
-	r = radius
-	numRings = numRings+1;
-	phi   = Math.PI/numRings;
-	theta = 2*Math.PI/vertPerRing;
-	vertices = []
-	for (i = 0; i<numRings+1; i++) {  //Should include "ring" for top/bot points
-		vertices.push([])
-			for (j = 0; j<vertPerRing; j++) {
-				y = r*Math.cos(i*phi)
-				x = r*Math.sin(i*phi)*Math.cos(j*theta);// + (i/2)*theta)
-				z = r*Math.sin(i*phi)*Math.sin(j*theta);// + (i/2)*theta)
-				
-				vertices[i].push([x,y,z])
-			}
-	}
-	triangle_strip = [];
-	for (i = 0; i<numRings; i++) {
-		li = vertices[i].length
-		li1 = vertices[i+1].length
-		triangle_strip = triangle_strip.concat(vertices[i][li-1])
-		triangle_strip = triangle_strip.concat(vertices[i+1][li1-1])
-		for (j = 0; j<vertPerRing; j++) {
-			triangle_strip = triangle_strip.concat(vertices[i][j])
-			triangle_strip = triangle_strip.concat(vertices[i+1][j])
-		}
-		triangle_strip = triangle_strip.concat(vertices[i][0])
-		triangle_strip = triangle_strip.concat(vertices[i+1][0])
-	}
-	numItems = triangle_strip.length/3	//based on 3-vector
-	return [triangle_strip,numItems]
-}
 
 //global gl for calling opengl functions.
 var gl;

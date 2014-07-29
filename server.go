@@ -35,6 +35,7 @@ func main() {
 	http.HandleFunc("/",webHandler)
 	http.HandleFunc("/ws",wsHandler)
 	http.HandleFunc("/noencws",wsnoencHandler)
+	http.HandleFunc("/data.js",data)
 	http.HandleFunc("/script.js",jsscript)
 	http.HandleFunc("/glMatrix-0.9.5.min.js",glMatrix)
 	err := http.ListenAndServe(":"+port,nil)
@@ -63,6 +64,13 @@ func webHandler(res http.ResponseWriter, req *http.Request){
 
 	//arr[0] = strings.Join([]string{arr[0],string(js_arr)},``)
 	//fmt.Fprintln(res, strings.Join(arr,`</script>`))
+}
+func data(res http.ResponseWriter, req *http.Request) {
+	js_arr, err := ioutil.ReadFile("data.js")
+	if err != nil {
+		fmt.Fprintln(res,[]byte("Error loading page."))
+	}
+	fmt.Fprintln(res, string(js_arr))
 }
 func jsscript(res http.ResponseWriter, req *http.Request) {
 	js_arr, err := ioutil.ReadFile("script.js")
