@@ -1,11 +1,20 @@
-function Triangle() {
+function Triangle(coord,scale) {
+	if (!scale) {
+		scale = 1.0
+	}
 	this.VertexPositionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
 	var vertices = [
+		 0.0, scale, 0.0,
+		-scale, -scale, 0.0,
+		scale,  -scale, 0.0
+	];
+	/*
 		 0.0,  1.0,  0.0,
 		-1.0, -1.0,  0.0,
 		 1.0, -1.0,  0.0
 	];
+	*/
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	this.VertexPositionBuffer.itemSize = 3;
 	this.VertexPositionBuffer.numItems = 3;
@@ -20,6 +29,12 @@ function Triangle() {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 	this.VertexColorBuffer.itemSize = 4;
 	this.VertexColorBuffer.numItems = 3;
+
+	this.position = mat4.create();
+	mat4.identity(this.position);
+	mat4.translate(this.position,coord);
+
+	this.coord = coord;
 }
 
 Triangle.prototype.Draw = function() {
@@ -48,7 +63,7 @@ Triangle.prototype.Delete = function() {
 
 
 
-function Square() {
+function Square(coord) {
 	this.VertexPositionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
 	var vertices = [
@@ -70,6 +85,12 @@ function Square() {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 	this.VertexColorBuffer.itemSize = 4;
 	this.VertexColorBuffer.numItems = 4;
+
+	this.position = mat4.create();
+	mat4.identity(this.position);
+	mat4.translate(this.position,coord);
+
+	this.coord = coord;
 }
 
 Square.prototype.Draw = function() {
@@ -92,7 +113,7 @@ Square.prototype.Delete = function() {
 
 
 
-function Cube() {
+function Cube(coord) {
 	this.VertexPositionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
 
@@ -158,6 +179,12 @@ function Cube() {
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(VertexIndices), gl.STATIC_DRAW);
 	this.VertexIndexBuffer.itemSize = 1;
 	this.VertexIndexBuffer.numItems = 36;
+
+	this.position = mat4.create();
+	mat4.identity(this.position);
+	mat4.translate(this.position,coord);
+
+	this.coord = coord;
 }
 
 Cube.prototype.Draw = function() {
@@ -182,7 +209,7 @@ Cube.prototype.Delete = function() {
 
 
 
-function Sphere(radius,numRings,numVertPerRing) {
+function Sphere(coord, radius,numRings,numVertPerRing) {
 	this.VertexPositionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
 	out = createSphereVertices(radius,numRings,numVertPerRing);
@@ -202,6 +229,12 @@ function Sphere(radius,numRings,numVertPerRing) {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 	this.VertexColorBuffer.itemSize = 4;
 	this.VertexColorBuffer.numItems = out[1];
+
+	this.position = mat4.create();
+	mat4.identity(this.position);
+	mat4.translate(this.position,coord);
+
+	this.coord = coord;
 }
 
 Sphere.prototype.Draw = function() {

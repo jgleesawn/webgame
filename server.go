@@ -33,6 +33,9 @@ func main() {
 		port = "5000"
  	}
 	http.HandleFunc("/",webHandler)
+	http.HandleFunc("/gl.js",gl)
+	http.HandleFunc("/view.js",view)
+	http.HandleFunc("/controls.js",controls)
 	http.HandleFunc("/data.js",data)
 	http.HandleFunc("/script.js",jsscript)
 	http.HandleFunc("/glMatrix-0.9.5.min.js",glMatrix)
@@ -63,6 +66,29 @@ func webHandler(res http.ResponseWriter, req *http.Request){
 	//arr[0] = strings.Join([]string{arr[0],string(js_arr)},``)
 	//fmt.Fprintln(res, strings.Join(arr,`</script>`))
 }
+func gl(res http.ResponseWriter, req *http.Request) {
+	js_arr, err := ioutil.ReadFile("gl.js")
+	if err != nil {
+		fmt.Fprintln(res,[]byte("Error loading page."))
+	}
+	fmt.Fprintln(res, string(js_arr))
+}
+func view(res http.ResponseWriter, req *http.Request) {
+	js_arr, err := ioutil.ReadFile("view.js")
+	if err != nil {
+		fmt.Fprintln(res,[]byte("Error loading page."))
+	}
+	fmt.Fprintln(res, string(js_arr))
+}
+
+func controls(res http.ResponseWriter, req *http.Request) {
+	js_arr, err := ioutil.ReadFile("controls.js")
+	if err != nil {
+		fmt.Fprintln(res,[]byte("Error loading page."))
+	}
+	fmt.Fprintln(res, string(js_arr))
+}
+
 func data(res http.ResponseWriter, req *http.Request) {
 	js_arr, err := ioutil.ReadFile("data.js")
 	if err != nil {

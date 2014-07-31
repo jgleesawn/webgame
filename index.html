@@ -1,10 +1,13 @@
 <html>
   <head>
     <meta charset='utf-8'/>
-    <script type="text/javascript">ws = new WebSocket('ws://localhost:5000/noencws');</script>
+	<!--<script type="text/javascript">ws = new WebSocket('ws://localhost:5000/noencws');</script>-->
 	<script type="text/javascript" src="/glMatrix-0.9.5.min.js"></script>
-	<script type="text/javascript" src="/script.js"></script>
+	<script type="text/javascript" src="/controls.js"></script>
+	<script type="text/javascript" src="/gl.js"></script>
 	<script type="text/javascript" src="/data.js"></script>
+	<script type="text/javascript" src="/view.js"></script>
+	<script type="text/javascript" src="/script.js"></script>
 	<script id="shader-fs" type="x-shader/x-fragment">
 		precision mediump float;
 
@@ -21,16 +24,17 @@
 
 		uniform mat4 uMVMatrix;
 		uniform mat4 uPMatrix;
+		uniform mat4 uCMatrix;	//Clipping Matrix
 
 		varying vec4 vColor;
 
 		void main(void) {
-			gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+			gl_Position = uPMatrix * (uMVMatrix) * vec4(aVertexPosition, 1.0);
 			vColor = aVertexColor;
 		}
 	</script>
   </head>
   <body style='margin:0px' onload='webGLStart()'>
-    <canvas id='cid' style='position: absolute; background-color: black;'></canvas>
+    <canvas id='cid' width='640' height='480' style='position: relative; background-color: black;'></canvas>
   </body>
 </html>
