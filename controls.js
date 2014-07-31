@@ -41,7 +41,6 @@ var clicked = false;
 			var yangle = (Math.PI*fov * (y/gl.viewportHeight)/180);
 			view.Yaw(xangle);
 			view.Pitch(yangle); 
-			//console.log(xangle,yangle);
 		}
 		pos.x = x;
 		pos.y = y;
