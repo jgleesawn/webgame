@@ -8,7 +8,9 @@ function webGLStart() {
 	view = new View();
 
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
-	gl.enable(gl.DEPTH_TEST);
+	//gl.enable(gl.DEPTH_TEST);
+	gl.enable(gl.BLEND);
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 	loop();
 }
@@ -57,6 +59,13 @@ function drawScene() {
 	view.Draw(triangle);
 	view.Draw(square);
 	for( i=0; i<spheres.length; i++){
+		if (i%2 == 0) {
+			gl.disable(gl.DEPTH_TEST);
+			gl.enable(gl.BLEND);
+		} else {
+			gl.disable(gl.BLEND);
+			gl.enable(gl.DEPTH_TEST);
+		}
 		view.Draw(spheres[i]);
 	}
 	view.Draw(cube);

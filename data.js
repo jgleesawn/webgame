@@ -224,7 +224,7 @@ function Sphere(coord, radius,numRings,numVertPerRing) {
 	var colors = [];
 	for (var i=0; i < out[1]; i++) {
 		var step = 1/out[1];
-		colors = colors.concat([1.0-i*step, i*step, Math.abs(1-2*i*step), 1.0]);
+		colors = colors.concat([1.0-i*step, i*step, Math.abs(1-2*i*step), 0.1]);
 	}
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 	this.VertexColorBuffer.itemSize = 4;
