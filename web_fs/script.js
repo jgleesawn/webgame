@@ -40,7 +40,8 @@ function loop(scope) {
 	view.Draw(scope);
 	scope.updateForce();
 	scope.applyForce();
-	//scope.applyGravity([0.0,0.0,0.0]);
+	scope.applyGravity([-1.0,-1.0,0.0]);
+	scope.applyGravity([1.0,1.0,0.0]);
 	//drawScene();
 	//animate();
 

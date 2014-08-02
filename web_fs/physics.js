@@ -226,8 +226,9 @@ Scope.prototype.applyForce = function() {
 		vec3.scale(this.atoms[i].field,1/1000,dist);
 		vec3.add(this.atoms[i].position,dist);
 
+		//l here defines the boundary of the scope.
 		var l = vec3.length(this.atoms[i].position);
-		if ( l > 20 ) {
+		if ( l > 10 ) {
 			for ( var j=0; j<this.atoms[i].bonds.length; j++) {
 				if (this.atoms[i].bonds[j] == undefined) { continue }
 				vec3.negate(this.atoms[j].position);
@@ -260,26 +261,37 @@ Scope.prototype.AddAtom = function(p,e,coord) {
 }
 
 Scope.prototype.InitVisual = function() {
-	this.triangles = [];
+	this.trianglestrips = [];
 	cVertex = [
 		1.0, 0.0, 0.0, 0.1,
 		0.0, 1.0, 0.0, 0.1,
-		0.0, 0.0, 1.0, 0.1
+		0.0, 0.0, 1.0, 0.1,
+		1.0, 1.0, 0.0, 0.1
 	];
-	for ( var i=0; i<this.atoms.length/3-1; i++) {
-		this.triangles.push(new Triangle([0.0,0.0,0.0],1.0));
-		this.triangles[i].UpdateColorVertices(cVertex);
+	for ( var i=0; i<this.atoms.length; i++) {
+		this.trianglestrips.push(new Square([0.0,0.0,0.0]));
+		this.trianglestrips[i].UpdateColorVertices(cVertex);
 	}
 }
 Scope.prototype.Draw = function() {
-	for ( var i=0; i<this.atoms.length/3-1; i++) {
+	for ( var i=0; i<this.atoms.length; i++) {
 		var v = [];
-		for ( var j=0; j<3; j++) {
-			if (3*i + j > 200) { console.log(3*i+j) }
-			v = v.concat(this.atoms[3*i+j].position);
+		var cVertex = [];
+		var count = 1;
+		v = v.concat(this.atoms[i].position);
+		for ( var j=0; j<this.atoms[i].bonds.length; j++) {
+			if ( this.atoms[i].bonds[j] == undefined ) { continue }
+			v = v.concat(this.atoms[j].position);
+			var tvert = [0.0, 0.0, 0.0, 0.1];
+			tvert[j%3] = 1.0;
+			cVertex = cVertex.concat(tvert);
+			count += 1;
 		}
-		this.triangles[i].UpdatePositionVertices(v);
-		this.triangles[i].Draw();
+		if ( count > 2 ) {
+			this.trianglestrips[i].UpdatePositionVertices(v,count);
+			this.trianglestrips[i].UpdateColorVertices(cVertex);
+			this.trianglestrips[i].Draw();
+		}
 
 		//view.Draw(this.atoms[i]);
 	}
