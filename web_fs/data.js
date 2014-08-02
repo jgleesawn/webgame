@@ -103,6 +103,7 @@ Square.prototype.UpdatePositionVertices = function(vertices,count) {
 		return
 	}
 	this.VertexPositionBuffer.numItems = count;
+	this.VertexColorBuffer.numItems = count;
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 }
