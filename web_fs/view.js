@@ -158,6 +158,7 @@ View.prototype.Draw = function(obj) {
 	
 	mat4.multiply(mvMatrix,this.B);
 
+	if(obj.position == undefined) { console.log("undefined") }
 	mat4.translate(mvMatrix, obj.position);	//Most Recent.
 
 	obj.Draw();

@@ -25,6 +25,7 @@ function webGLStart() {
 		var z = Math.random()*8-4;
 		scope.AddAtom(p,e,[x,y,z]);
 	}
+	scope.InitVisual();
 	loop(scope);
 }
 function loop(scope) {
@@ -35,7 +36,8 @@ function loop(scope) {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	view.Set();
 
-	scope.Draw();
+	//scope.Draw();
+	view.Draw(scope);
 	scope.updateForce();
 	scope.applyForce();
 	//scope.applyGravity([0.0,0.0,0.0]);

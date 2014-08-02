@@ -175,6 +175,7 @@ function updateForce(obj1,obj2) {
 
 function Scope() {
 	this.atoms = [];
+	this.position = vec3.create();
 }
 
 Scope.prototype.updateForce = function() {
@@ -258,8 +259,28 @@ Scope.prototype.AddAtom = function(p,e,coord) {
 	this.atoms.push(new Atom(p,e,coord));
 }
 
+Scope.prototype.InitVisual = function() {
+	this.triangles = [];
+	cVertex = [
+		1.0, 0.0, 0.0, 0.1,
+		0.0, 1.0, 0.0, 0.1,
+		0.0, 0.0, 1.0, 0.1
+	];
+	for ( var i=0; i<this.atoms.length/3-1; i++) {
+		this.triangles.push(new Triangle([0.0,0.0,0.0],1.0));
+		this.triangles[i].UpdateColorVertices(cVertex);
+	}
+}
 Scope.prototype.Draw = function() {
-	for ( var i=0; i<this.atoms.length; i++) {
-		view.Draw(this.atoms[i]);
+	for ( var i=0; i<this.atoms.length/3-1; i++) {
+		var v = [];
+		for ( var j=0; j<3; j++) {
+			if (3*i + j > 200) { console.log(3*i+j) }
+			v = v.concat(this.atoms[3*i+j].position);
+		}
+		this.triangles[i].UpdatePositionVertices(v);
+		this.triangles[i].Draw();
+
+		//view.Draw(this.atoms[i]);
 	}
 }

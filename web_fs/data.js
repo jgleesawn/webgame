@@ -98,6 +98,21 @@ function Square(position) {
 
 	this.position = position;
 }
+Square.prototype.UpdatePositionVertices = function(vertices,count) {
+	if (vertices.length != this.VertexPositionBuffer.itemSize*count) {
+		return
+	}
+	this.VertexPositionBuffer.numItems = count;
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+}
+Square.prototype.UpdateColorVertices = function(vertices) {
+	if (vertices.length != this.VertexColorBuffer.itemSize*this.VertexColorBuffer.numItems) {
+		return
+	}
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexColorBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+}
 
 Square.prototype.Draw = function() {
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
