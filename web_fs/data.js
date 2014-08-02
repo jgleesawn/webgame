@@ -1,4 +1,4 @@
-function Triangle(coord,scale) {
+function Triangle(position,scale) {
 	if (!scale) {
 		scale = 1.0
 	}
@@ -30,11 +30,21 @@ function Triangle(coord,scale) {
 	this.VertexColorBuffer.itemSize = 4;
 	this.VertexColorBuffer.numItems = 3;
 
-	this.position = mat4.create();
-	mat4.identity(this.position);
-	mat4.translate(this.position,coord);
-
-	this.coord = coord;
+	this.position = position;
+}
+Triangle.prototype.UpdatePositionVertices = function(vertices) {
+	if (vertices.length != this.VertexPositionBuffer.itemSize*this.VertexPositionBuffer.numItems) {
+		return
+	}
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+}
+Triangle.prototype.UpdateColorVertices = function(vertices) {
+	if (vertices.length != this.VertexColorBuffer.itemSize*this.VertexColorBuffer.numItems) {
+		return
+	}
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexColorBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 }
 
 Triangle.prototype.Draw = function() {
@@ -42,12 +52,12 @@ Triangle.prototype.Draw = function() {
 	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute,
 			this.VertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangle.VertexColorBuffer);
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexColorBuffer);
 	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,
-			triangle.VertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			this.VertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 	setMatrixUniforms();
-	gl.drawArrays(gl.TRIANGLES, 0, triangle.VertexPositionBuffer.numItems);
+	gl.drawArrays(gl.TRIANGLES, 0, this.VertexPositionBuffer.numItems);
 }
 
 
@@ -63,7 +73,7 @@ Triangle.prototype.Delete = function() {
 
 
 
-function Square(coord) {
+function Square(position) {
 	this.VertexPositionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
 	var vertices = [
@@ -86,11 +96,7 @@ function Square(coord) {
 	this.VertexColorBuffer.itemSize = 4;
 	this.VertexColorBuffer.numItems = 4;
 
-	this.position = mat4.create();
-	mat4.identity(this.position);
-	mat4.translate(this.position,coord);
-
-	this.coord = coord;
+	this.position = position;
 }
 
 Square.prototype.Draw = function() {
@@ -113,7 +119,7 @@ Square.prototype.Delete = function() {
 
 
 
-function Cube(coord) {
+function Cube(position) {
 	this.VertexPositionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
 
@@ -180,11 +186,7 @@ function Cube(coord) {
 	this.VertexIndexBuffer.itemSize = 1;
 	this.VertexIndexBuffer.numItems = 36;
 
-	this.position = mat4.create();
-	mat4.identity(this.position);
-	mat4.translate(this.position,coord);
-
-	this.coord = coord;
+	this.position = position;
 }
 
 Cube.prototype.Draw = function() {
@@ -209,7 +211,7 @@ Cube.prototype.Delete = function() {
 
 
 
-function Sphere(coord, radius,numRings,numVertPerRing) {
+function Sphere(position, radius,numRings,numVertPerRing) {
 	this.VertexPositionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
 	out = createSphereVertices(radius,numRings,numVertPerRing);
@@ -230,11 +232,21 @@ function Sphere(coord, radius,numRings,numVertPerRing) {
 	this.VertexColorBuffer.itemSize = 4;
 	this.VertexColorBuffer.numItems = out[1];
 
-	this.position = mat4.create();
-	mat4.identity(this.position);
-	mat4.translate(this.position,coord);
-
-	this.coord = coord;
+	this.position = position;
+}
+Sphere.prototype.UpdatePositionVertices = function(vertices) {
+	if (vertices.length != this.VertexPositionBuffer.itemSize*this.VertexPositionBuffer.numItems) {
+		return
+	}
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexPositionBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+}
+Sphere.prototype.UpdateColorVertices = function(vertices) {
+	if (vertices.length != this.VertexColorBuffer.itemSize*this.VertexColorBuffer.numItems) {
+		return
+	}
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.VertexColorBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 }
 
 Sphere.prototype.Draw = function() {

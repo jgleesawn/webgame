@@ -1,6 +1,6 @@
 function View() {
-	this.coord = vec3.create();
-	this.coord[2] = 36.0;
+	this.position = vec3.create();
+	this.position[2] = 36.0;
 	this.focalPoint = vec3.create();
 	this.focalPoint[2] = -1.0;
 	this.up = vec3.create();
@@ -15,7 +15,13 @@ function View() {
 	
 	this.direction = [0,0];
 
-	this.aim = new Triangle([0.0,0.0,0.0],0.0005);
+	this.aim = new Triangle([0.0,0.0,0.0]);
+	var vertices = [
+		0.0, 0.0005, 0.0,
+		-0.0005, -0.0005, 0.0,
+		0.0005, -0.0005, 0.0
+	];
+	this.aim.UpdatePositionVertices(vertices);
 }
 View.prototype.UpdateBasis = function() {
 	this.B[0] = this.cross[0];
@@ -139,19 +145,20 @@ View.prototype.Draw = function(obj) {
 		return;
 	}
 
+
 	mat4.identity(cMatrix);
 	mat4.multiply(cMatrix,this.B);
-	mat4.translate(cMatrix, this.coord);
+	mat4.translate(cMatrix, this.position);
 
-	var coord = vec3.create();
-	coord[0] = this.B[12];
-	coord[1] = this.B[13];
-	coord[2] = this.B[14];
+	var position = vec3.create();
+	position[0] = this.B[12];
+	position[1] = this.B[13];
+	position[2] = this.B[14];
 	mat4.identity(mvMatrix);
 	
 	mat4.multiply(mvMatrix,this.B);
 
-	mat4.translate(mvMatrix, obj.coord);	//Most Recent.
+	mat4.translate(mvMatrix, obj.position);	//Most Recent.
 
 	obj.Draw();
 }

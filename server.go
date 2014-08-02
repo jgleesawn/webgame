@@ -32,6 +32,7 @@ func main() {
 	if port == "" {
 		port = "5000"
  	}
+	/*
 	http.HandleFunc("/",webHandler)
 	http.HandleFunc("/gl.js",gl)
 	http.HandleFunc("/view.js",view)
@@ -39,6 +40,8 @@ func main() {
 	http.HandleFunc("/data.js",data)
 	http.HandleFunc("/script.js",jsscript)
 	http.HandleFunc("/glMatrix-0.9.5.min.js",glMatrix)
+	*/
+	http.Handle("/", http.FileServer(http.Dir("./web_fs")));
 	err := http.ListenAndServe(":"+port,nil)
 	if err != nil {
 		panic(err)
