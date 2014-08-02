@@ -6,6 +6,7 @@ var orbitals = [
 	[2,10,6],
 	[2,10,6],
 	];
+var bondLength = [ 1.0, 0.7, 0.5, 0.3 ];
 //Stops before the transition metals.
 //Following periods have f-orbitals.
 //Filling of orbitals varies more as the atomic number goes up.
@@ -124,6 +125,8 @@ function Atom(protons,electrons,position) {
 
 	this.position = position;
 
+	this.bonds = [];
+
 	this.momentum = [0.0,0.0,0.0];
 
 	this.orbital = new Orbitals();
@@ -167,7 +170,7 @@ function updateForce(obj1,obj2) {
 
 	vec3.add(obj1.field,F21);
 	vec3.add(obj2.field,F12);
-	return 0;
+	return -1;
 }
 
 function Scope() {
@@ -177,27 +180,31 @@ function Scope() {
 Scope.prototype.updateForce = function() {
 	var bonds = [];
 	for (var i=0; i<this.atoms.length; i++) {
+		this.atoms[i].bonds = [];
 		for ( var j=i+1; j< this.atoms.length; j++) {
 			var v = updateForce(this.atoms[i],this.atoms[j]);
-			if ( v!= 0 ) {
-				var v = vec3.create();
-				vec3.set(v,this.atoms[j].field);
-				try {
-					bonds[i].push(v);
-				} catch(e) {
-					bonds[i] = [v];
-				}
-				v = vec3.create();
-				vec3.set(v,this.atoms[i].field);
-				try {
-					bonds[j].push(v);
-				} catch(e) {
-					bonds[j] = [v];
-				}
+			if ( v == -1 ) {
+				this.atoms[i].bonds[j] = undefined;
+				this.atoms[j].bonds[i] = undefined;
+			} else {
+				this.atoms[i].bonds[j] = v;
+				this.atoms[j].bonds[i] = v;
 			}
 		}
 	}
-	for (var i=0; i<bonds.length; i++) {
+	var fields = []
+	for (var i=0; i<this.atoms.length; i++) {
+		fields[i] = vec3.create();
+		var l = 0;
+		for (var j=0; j<this.atoms[i].bonds.length; j++) {
+			if (this.atoms[i].bonds[j] == undefined) { continue }
+			vec3.add(fields[i],this.atoms[j].field);
+			l += 1;
+		}
+		vec3.add(fields[i],this.atoms[i].field);
+		l += 1;
+		vec3.scale(fields[i],1/l)
+/*
 		var temp = vec3.create();
 		try {
 			for (var j=0; j<bonds[i].length; j++){
@@ -206,6 +213,10 @@ Scope.prototype.updateForce = function() {
 			vec3.scale(temp,bonds[i].length);
 			vec3.set(this.atoms[i].field,temp);
 		} catch(e) {}
+*/
+	}
+	for (var i=0; i<this.atoms.length; i++) {
+		vec3.set(this.atoms[i].field,fields[i]);
 	}
 }
 Scope.prototype.applyForce = function() {
@@ -213,6 +224,16 @@ Scope.prototype.applyForce = function() {
 		var dist = vec3.create();
 		vec3.scale(this.atoms[i].field,1/1000,dist);
 		vec3.add(this.atoms[i].position,dist);
+
+		var l = vec3.length(this.atoms[i].position);
+		if ( l > 20 ) {
+			for ( var j=0; j<this.atoms[i].bonds.length; j++) {
+				if (this.atoms[i].bonds[j] == undefined) { continue }
+				vec3.negate(this.atoms[j].position);
+			}
+			vec3.negate(this.atoms[i].position);
+			vec3.add(this.atoms[i].position,dist);
+		}
 	}
 }
 
@@ -221,7 +242,7 @@ Scope.prototype.applyGravity = function(coord) {
 		var t = vec3.create();
 		vec3.subtract(coord,this.atoms[i].position,t);
 		var l = vec3.length(t);
-		if ( l < 1.5 ) {
+		if ( l < 1 ) {
 			vec3.normalize(t);
 			vec3.scale(t,-1/(l*l*10));
 			vec3.add(this.atoms[i].position,t);

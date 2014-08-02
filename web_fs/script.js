@@ -20,9 +20,9 @@ function webGLStart() {
 		//p = Math.floor((3*Math.random())+1);
 		e = Math.floor((3*Math.random())+1);
 		e = p+(Math.floor(Math.random()*8)-4);
-		var x = Math.random()*8;
-		var y = Math.random()*8;
-		var z = Math.random()*8;
+		var x = Math.random()*8-4;
+		var y = Math.random()*8-4;
+		var z = Math.random()*8-4;
 		scope.AddAtom(p,e,[x,y,z]);
 	}
 	loop(scope);
@@ -38,7 +38,7 @@ function loop(scope) {
 	scope.Draw();
 	scope.updateForce();
 	scope.applyForce();
-	scope.applyGravity([0.0,0.0,0.0]);
+	//scope.applyGravity([0.0,0.0,0.0]);
 	//drawScene();
 	//animate();
 
