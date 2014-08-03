@@ -14,7 +14,7 @@ function webGLStart() {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
 	var scope = new Scope(27,21);
-	for (var i=0; i<100; i++) {
+	for (var i=0; i<200; i++) {
 		var p = Math.floor(1+36*Math.random());//54*Math.random());
 		var e = Math.floor(1+8*Math.random());
 		//p = Math.floor((3*Math.random())+1);

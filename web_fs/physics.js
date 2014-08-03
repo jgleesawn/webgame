@@ -359,10 +359,33 @@ Scope.prototype.updateGravField = function() {
 						this.Gravfield[index[0]][index[1]][index[2]] = vec3.create();
 					}
 
-					vec3.add(this.Gravfield[index[0]][index[1]][index[2]],vect);
+					vec3.set([0.0,0.0,0.0],vect);
+
+					//vec3.add(this.Gravfield[index[0]][index[1]][index[2]],vect);
 				}
 			}
 		}
+
+
+		var mass = 100;
+		var origin = [0.0,-1000.0,0.0];
+
+		var rpos = this.atoms[i].position
+		var pos = getGridCoord(rpos);
+		vec3.add(pos,goffset);
+		var oob = false
+		for( var m=0; m<pos.length; m++) {
+			if( pos[m] < 0 ) { oob = true }
+			if( pos[m] >= this.Gravfield.length ) { oob = true }
+		}
+		if( oob ) { continue }
+
+		var vect = vec3.create();
+		vec3.subtract(origin,rpos,vect);
+		var len = vec3.length(vect);
+		vec3.normalize(vect);
+		vec3.scale(vect,mass/(len*len));
+		this.Gravfield[pos[0]][pos[1]][pos[2]] = vect;
 	}
 }
 Scope.prototype.applyGravField = function() {
@@ -390,7 +413,7 @@ Scope.prototype.applyGravField = function() {
 			t = vec3.create();
 		}
 		vec3.set(t,vect);
-		vec3.scale(vect,charge);
+		vec3.scale(vect,charge/10000);
 		//Just updates, doesn't maintain distance between atoms.
 		vec3.add(this.atoms[i].field,vect);
 		//vec3.add(this.atoms[i].position,vect);
@@ -398,11 +421,8 @@ Scope.prototype.applyGravField = function() {
 }
 Scope.prototype.applyFields = function() {
 	for( var i=0; i<this.atoms.length; i++) {
-		if( i==0 ) {console.log(this.atoms[0].field);}
 		vec3.add(this.atoms[i].position, this.atoms[i].field);
-		if( i==0 ) {console.log(this.atoms[0].field);}
 		vec3.set([0.0,0.0,0.0],this.atoms[i].field);
-		if( i==0 ) {console.log(this.atoms[0].field);}
 	}
 }
 

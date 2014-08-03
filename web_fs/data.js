@@ -318,3 +318,12 @@ function createSphereVertices(radius,numRings,vertPerRing) {
 	return [triangle_strip,numItems]
 }
 
+
+
+
+
+
+
+
+
+
