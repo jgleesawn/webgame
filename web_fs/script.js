@@ -13,16 +13,16 @@ function webGLStart() {
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
-	var scope = new Scope(27);
-	for (var i=0; i<200; i++) {
+	var scope = new Scope(27,21);
+	for (var i=0; i<100; i++) {
 		var p = Math.floor(1+36*Math.random());//54*Math.random());
 		var e = Math.floor(1+8*Math.random());
 		//p = Math.floor((3*Math.random())+1);
 		e = Math.floor((3*Math.random())+1);
 		e = p+(Math.floor(Math.random()*5)-2);
-		var x = Math.random()*6-3;
-		var y = Math.random()*6-3;
-		var z = Math.random()*6-3;
+		var x = Math.random()*20-10;
+		var y = Math.random()*20-10;
+		var z = Math.random()*20-10;
 		scope.AddAtom(p,e,[x,y,z]);
 	}
 	scope.InitVisual();
@@ -32,14 +32,25 @@ function loop(scope) {
 	window.requestAnimationFrame(function() {
 		loop(scope);
 	});
-
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	view.Set();
 
 	//scope.Draw();
 	view.Draw(scope);
-	scope.updateForce();
-	scope.applyForce();
+	//scope.updateForce();
+	//scope.applyForce();
+	
+	scope.updateEMField();
+	scope.applyEMField();
+
+	scope.updateGravField();
+	scope.applyGravField();
+
+	scope.applyFields();
+
+	scope.EMfield = createGrid(21);
+	scope.Gravfield = createGrid(21);
+	
 	//scope.applyGravity([-1.0,-1.0,0.0]);
 	//scope.applyGravity([1.0,1.0,0.0]);
 	//scope.applyGravity([0.0,0.0,0.0]);

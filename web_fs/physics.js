@@ -117,7 +117,15 @@ function interact(atom1,atom2) {
 	var bonding;
 	var antibonding;
 
-	var t = orbital1.count + orbital2.count;
+	var t = 0;
+	for( var i=0; i<orbital1.cOrbital; i++) {
+		t += orbitals[orbital1.cPeriod][i];
+	}
+	for( var i=0; i<orbital2.cOrbital; i++) {
+		t += orbitals[orbital2.cPeriod][i];
+	}
+	t += orbital1.count + orbital2.count;
+
 	if ( t > size/2 ) {
 		bonding = size/2;
 		antibonding = t-bonding;
@@ -186,11 +194,219 @@ function updateForce(obj1,obj2) {
 	return -1;
 }
 
-function Scope(radius) {
+function Scope(radius,size) {
 	this.atoms = [];
 	this.position = vec3.create();
 	this.radius = radius;
+	this.EMfield = new createGrid(size);
+	this.Gravfield = new createGrid(size);
+	this.occupied = new createGrid(size,returnFalse);
 }
+
+function createGrid(size) {
+	var grid = [];
+	for( var i=0; i<size; i++) {
+		var b = [];
+		for( var j=0; j<size; j++) {
+			var a = [];
+			a[size-1] = undefined;
+			b.push(a);
+		}
+		grid.push(b);
+	}
+	return grid;
+}
+function getGridCoord(position) {
+	var out = vec3.create();
+	for( var i=0; i<position.length; i++) {
+		if( position[i] < 0 ) {
+			out[i] = Math.ceil(position[i]);
+		} else if( position[i] > 0 ) {
+			out[i] = Math.floor(position[i]);
+		}
+	}
+	return out;
+}
+
+function returnFalse() {
+	return false;
+}
+
+//Discrete Field.
+Scope.prototype.updateEMField = function() {
+	var position = vec3.create();
+	var rpos = vec3.create();
+
+	var index = vec3.create();
+	var vect = vec3.create();
+
+	var indoffset = Math.floor(this.EMfield.length/2);
+	var goffset = [indoffset,indoffset,indoffset];
+
+	for( var i=0; i<this.atoms.length; i++) {
+		vec3.set(this.atoms[i].position,rpos);
+		var position = getGridCoord(rpos);
+
+		var charge = this.atoms[i].positive-this.atoms[i].negative;
+		for( var j=-3; j<3; j++) {
+			for( var k=-3; k<3; k++) {
+				for( var l=-3; l<3; l++) {
+					vec3.add(position,[j,k,l],index);
+					vec3.add(index,goffset);
+					var oob = false
+					for( var m=0; m<index.length; m++) {
+						if( index[m] < 0 ) { oob = true }
+						if( index[m] >= this.EMfield.length ) { oob = true }
+					}
+					if( oob ) { continue }
+
+					//This ensures atom doesn't affect itself.
+					//Can now use rpos for computing other fields' affects.
+					if( j==0 && k==0 && l==0 ) { 
+						vec3.set([0,0,0],vect);
+					} else {
+
+						vec3.subtract(rpos,index,vect);
+						var len = vec3.length(vect);
+						vec3.scale(vect,charge/(len*len));
+					}
+
+					var t = this.EMfield[index[0]][index[1]][index[2]];
+					if( t == undefined) { 
+						this.EMfield[index[0]][index[1]][index[2]] = vec3.create();
+					}
+
+					vec3.add(this.EMfield[index[0]][index[1]][index[2]],vect);
+				}
+			}
+		}
+	}
+}
+Scope.prototype.applyEMField = function() {
+	var vect = vec3.create();
+	var position;
+	var charge;
+
+	var indoffset = Math.floor(this.EMfield.length/2);
+	var goffset = [indoffset,indoffset,indoffset];
+
+	for( var i=0; i<this.atoms.length; i++) {
+		charge = this.atoms[i].positive-this.atoms[i].negative;
+		charge *= -1/1;
+
+		position = getGridCoord(this.atoms[i].position);
+		vec3.add(position,goffset);
+		var oob = false
+		for( var m=0; m<position.length; m++) {
+			if( position[m] < 0 ) { oob = true }
+			if( position[m] >= this.EMfield.length ) { oob = true }
+		}
+		if( oob ) { continue }
+
+		var t = this.EMfield[position[0]][position[1]][position[2]];
+		if( t == undefined ) {
+			t = vec3.create();
+		}
+		vec3.set(t,vect);
+		vec3.scale(vect,charge);
+		//Just updates, doesn't maintain distance between atoms.
+		vec3.add(this.atoms[i].field,vect);
+		//vec3.add(this.atoms[i].position,vect);
+	}
+}
+
+//Discrete Field.
+Scope.prototype.updateGravField = function() {
+	var position = vec3.create();
+	var rpos = vec3.create();
+
+	var index = vec3.create();
+	var vect = vec3.create();
+
+	var indoffset = Math.floor(this.Gravfield.length/2);
+	var goffset = [indoffset,indoffset,indoffset];
+
+	for( var i=0; i<this.atoms.length; i++) {
+		vec3.set(this.atoms[i].position,rpos);
+		var position = getGridCoord(rpos);
+
+		var charge = this.atoms[i].positive*2;
+		for( var j=-3; j<3; j++) {
+			for( var k=-3; k<3; k++) {
+				for( var l=-3; l<3; l++) {
+					vec3.add(position,[j,k,l],index);
+					vec3.add(index,goffset);
+					var oob = false
+					for( var m=0; m<index.length; m++) {
+						if( index[m] < 0 ) { oob = true }
+						if( index[m] >= this.Gravfield.length ) { oob = true }
+					}
+					if( oob ) { continue }
+
+					//This ensures atom doesn't affect itself.
+					//Can now use rpos for computing other fields' affects.
+					if( j==0 && k==0 && l==0 ) { 
+						vec3.set([0,0,0],vect);
+					} else {
+
+						vec3.subtract(rpos,index,vect);
+						var len = vec3.length(vect);
+						vec3.scale(vect,charge/(len*len));
+					}
+
+					var t = this.Gravfield[index[0]][index[1]][index[2]];
+					if( t == undefined) { 
+						this.Gravfield[index[0]][index[1]][index[2]] = vec3.create();
+					}
+
+					vec3.add(this.Gravfield[index[0]][index[1]][index[2]],vect);
+				}
+			}
+		}
+	}
+}
+Scope.prototype.applyGravField = function() {
+	var vect = vec3.create();
+	var position;
+	var charge;
+
+	var indoffset = Math.floor(this.Gravfield.length/2);
+	var goffset = [indoffset,indoffset,indoffset];
+
+	for( var i=0; i<this.atoms.length; i++) {
+		charge = this.atoms[i].positive*2;
+
+		position = getGridCoord(this.atoms[i].position);
+		vec3.add(position,goffset);
+		var oob = false
+		for( var m=0; m<position.length; m++) {
+			if( position[m] < 0 ) { oob = true }
+			if( position[m] >= this.Gravfield.length ) { oob = true }
+		}
+		if( oob ) { continue }
+
+		var t = this.Gravfield[position[0]][position[1]][position[2]];
+		if( t == undefined ) {
+			t = vec3.create();
+		}
+		vec3.set(t,vect);
+		vec3.scale(vect,charge);
+		//Just updates, doesn't maintain distance between atoms.
+		vec3.add(this.atoms[i].field,vect);
+		//vec3.add(this.atoms[i].position,vect);
+	}
+}
+Scope.prototype.applyFields = function() {
+	for( var i=0; i<this.atoms.length; i++) {
+		if( i==0 ) {console.log(this.atoms[0].field);}
+		vec3.add(this.atoms[i].position, this.atoms[i].field);
+		if( i==0 ) {console.log(this.atoms[0].field);}
+		vec3.set([0.0,0.0,0.0],this.atoms[i].field);
+		if( i==0 ) {console.log(this.atoms[0].field);}
+	}
+}
+
+
 
 Scope.prototype.updateForce = function() {
 	var bonds = [];
