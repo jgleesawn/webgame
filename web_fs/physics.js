@@ -106,12 +106,14 @@ function interact(atom1,atom2) {
 		}
 	}
 
+	var period = orbital1.cPeriod;
+	if( orbital1.cPeriod < orbital2.cPeriod ) { period = orbital2.cPeriod; }
 	
 	var size = 0;
-//	for( var i=0; i<orbitals[orbital1.cPeriod].length; i++) {
-//		size += orbitals[orbital1.cPeriod][i];
-//	}
-	size = orbitals[orbital1.cPeriod][orbital1.cOrbital];
+	for( var i=0; i<orbitals[period].length; i++) {
+		size += orbitals[period][i];
+	}
+	//size = orbitals[orbital1.cPeriod][orbital1.cOrbital];
 	var bonding;
 	var antibonding;
 
@@ -196,7 +198,7 @@ Scope.prototype.updateForce = function() {
 		this.atoms[i].bonds = [];
 		for ( var j=i+1; j< this.atoms.length; j++) {
 			var v = updateForce(this.atoms[i],this.atoms[j]);
-			if ( v < 0 ) {
+			if ( v <= 0 ) {	//v=0 is Ionic.
 				this.atoms[i].bonds[j] = undefined;
 				this.atoms[j].bonds[i] = undefined;
 			} else {
@@ -256,7 +258,8 @@ Scope.prototype.updateForce = function() {
 Scope.prototype.applyForce = function() {
 	for ( var i=0; i<this.atoms.length; i++) {
 		var dist = vec3.create();
-		vec3.scale(this.atoms[i].field,1/1000,dist);
+		var mass = this.atoms[i].positive*2;
+		vec3.scale(this.atoms[i].field,1/(1000*mass),dist);
 		vec3.add(this.atoms[i].position,dist);
 
 		//l here defines the boundary of the scope.

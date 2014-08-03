@@ -13,16 +13,16 @@ function webGLStart() {
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
-	var scope = new Scope(5);
+	var scope = new Scope(27);
 	for (var i=0; i<200; i++) {
-		var p = Math.floor(1+18*Math.random());//54*Math.random());
+		var p = Math.floor(1+36*Math.random());//54*Math.random());
 		var e = Math.floor(1+8*Math.random());
 		//p = Math.floor((3*Math.random())+1);
 		e = Math.floor((3*Math.random())+1);
 		e = p+(Math.floor(Math.random()*5)-2);
-		var x = Math.random()*4-2;
-		var y = Math.random()*4-2;
-		var z = Math.random()*4-2;
+		var x = Math.random()*6-3;
+		var y = Math.random()*6-3;
+		var z = Math.random()*6-3;
 		scope.AddAtom(p,e,[x,y,z]);
 	}
 	scope.InitVisual();
